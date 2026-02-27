@@ -2,6 +2,9 @@ import os
 
 from slack_bolt import App
 from slack_bolt.adapter.socket_mode import SocketModeHandler
+from ai.ai_constants import GAME_MASTER_SYSTEM_CONTENT
+from ai.anthropic import AnthropicAPI
+from mafia_queries import get_provider_response
 
 # This sample slack application uses SocketMode
 # For the companion getting started setup guide,
@@ -86,8 +89,15 @@ def handle_plain_text_input(body, ack, say, message):
     stateValues = body['state']['values']
     # Access the value using the block_id and action_id
     submittedString = stateValues['my_input_block_id']['plain_text_input-action']['value']
-    print("Submitted string:", submittedString)
+    #print("Submitted string:", submittedString)
+    response = get_provider_response(
+        user_id=body['user']['id'],
+        prompt=submittedString.split(),
+        system_content=GAME_MASTER_SYSTEM_CONTENT,
+    )
+    say(response)
     say(f"<@{body['user']['id']}> submitted the theme: {submittedString}")
+
 
 
 # Start your app
