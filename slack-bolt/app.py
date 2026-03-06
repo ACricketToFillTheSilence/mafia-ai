@@ -1,5 +1,7 @@
 import os
 
+from markdown_to_mrkdwn import SlackMarkdownConverter
+
 from slack_bolt import App
 from slack_bolt.adapter.socket_mode import SocketModeHandler
 from ai.ai_constants import GAME_MASTER_SYSTEM_CONTENT
@@ -12,6 +14,8 @@ from mafia_queries import get_provider_response
 
 # Initializes your app with your bot token
 app = App(token=os.environ.get("SLACK_BOT_TOKEN"))
+
+converter = SlackMarkdownConverter()
 
 
 # Listens to incoming messages that contain "hello"
@@ -95,6 +99,7 @@ def handle_plain_text_input(body, ack, say, message):
         prompt=submittedString.split(),
         system_content=GAME_MASTER_SYSTEM_CONTENT,
     )
+    response = converter.convert(response)
     say(response)
     say(f"<@{body['user']['id']}> submitted the theme: {submittedString}")
 
