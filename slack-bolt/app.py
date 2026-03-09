@@ -43,7 +43,7 @@ def message_new_game(message, say):
         blocks=[
             {
                 "type": "section",
-                "text": {"type": "mrkdwn", "text": "What is the theme?"},
+                "text": {"type": "mrkdwn", "text": "Can you tell me more about the game you'd like to play?"},
             },
             {
             	"type": "input",
@@ -54,10 +54,57 @@ def message_new_game(message, say):
 			    },
 			    "label": {
 				    "type": "plain_text",
-				    "text": "Label",
+				    "text": "Theme",
 				    "emoji": True
 			    },
 			    "optional": False
+            },
+            {
+                "type": "section",
+                "block_id": "player_number",
+                "text": {
+                    "type": "mrkdwn", 
+                    "text": "How many players?"
+                },
+                "accessory": {
+                    "action_id": "player_number_selection",
+                    "type": "static_select",
+                    "placeholder": {
+                        "type": "plain_text",
+                        "text": "Select number of players"
+                    },
+                    "options": [
+                        {
+                            "text": {
+                                "type": "plain_text",
+                                "text": "4 - 7"
+                            },
+                            "value": "4-7"
+                        },
+                        {
+                            "text": {
+                                "type": "plain_text",
+                                "text": "8 - 11"
+                            },
+                            "value": "8-11"
+                        },
+                        {
+                            "text": {
+                                "type": "plain_text",
+                                "text": "12 - 15"
+                            },
+                            "value": "12-15"
+                        },
+                        {
+                            "text": {
+                                "type": "plain_text",
+                                "text": "16 - 19"
+                            },
+                            "value": "16-19"
+                        }
+                    ]
+
+                }
             },
             {
 			    "type": "actions",
@@ -66,7 +113,7 @@ def message_new_game(message, say):
 					    "type": "button",
 					    "text": {
 						    "type": "plain_text",
-						    "text": "Click Me",
+						    "text": "Submit",
 						    "emoji": True
 					    },
 					    "value": "click_me_123",
@@ -94,14 +141,17 @@ def handle_plain_text_input(body, ack, say, message):
     # Access the value using the block_id and action_id
     submittedString = stateValues['my_input_block_id']['plain_text_input-action']['value']
     #print("Submitted string:", submittedString)
+
+    numberOfPlayers = stateValues['player_number']['player_number_selection']['selected_option']['value']
+    #say("The Number of players is: " + numberOfPlayers)
     response = get_provider_response(
         user_id=body['user']['id'],
         prompt=submittedString.split(),
-        system_content=GAME_MASTER_SYSTEM_CONTENT,
+        system_content=str.format(GAME_MASTER_SYSTEM_CONTENT, num_players=numberOfPlayers),
     )
     response = converter.convert(response)
     say(response)
-    say(f"<@{body['user']['id']}> submitted the theme: {submittedString}")
+    #say(f"<@{body['user']['id']}> submitted the theme: {submittedString}")
 
 
 
