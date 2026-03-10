@@ -60,50 +60,20 @@ def message_new_game(message, say):
 			    "optional": False
             },
             {
-                "type": "section",
-                "block_id": "player_number",
-                "text": {
-                    "type": "mrkdwn", 
-                    "text": "How many players?"
-                },
-                "accessory": {
-                    "action_id": "player_number_selection",
-                    "type": "static_select",
-                    "placeholder": {
-                        "type": "plain_text",
-                        "text": "Select number of players"
-                    },
-                    "options": [
-                        {
-                            "text": {
-                                "type": "plain_text",
-                                "text": "4 - 7"
-                            },
-                            "value": "4-7"
-                        },
-                        {
-                            "text": {
-                                "type": "plain_text",
-                                "text": "8 - 11"
-                            },
-                            "value": "8-11"
-                        },
-                        {
-                            "text": {
-                                "type": "plain_text",
-                                "text": "12 - 15"
-                            },
-                            "value": "12-15"
-                        },
-                        {
-                            "text": {
-                                "type": "plain_text",
-                                "text": "16 - 19"
-                            },
-                            "value": "16-19"
-                        }
-                    ]
-
+			    "type": "section",
+                "block_id": "multi_users_select",
+			    "text": {
+				    "type": "mrkdwn",
+				    "text": "Add specific users to the game."
+			    },
+			    "accessory": {
+				    "type": "multi_users_select",
+				    "placeholder": {
+					    "type": "plain_text",
+					    "text": "Select users",
+					    "emoji": True
+				    },
+				    "action_id": "users_select-action"
                 }
             },
             {
@@ -132,6 +102,13 @@ def action_button_click(body, ack, say):
     ack()
     say(f"<@{body['user']['id']}> clicked the button")
 
+@app.action("users_select-action")
+def handle_users_select(body, ack, say):
+    ack()
+    selected_users = body['actions'][0]['selected_users']
+    selected_users_mentions = ", ".join([f"<@{user_id}>" for user_id in selected_users])
+    say(f"<@{body['user']['id']}> selected the following users: {selected_users_mentions}")
+
 @app.action("actionId-0")
 def handle_plain_text_input(body, ack, say, message):
     ack()
@@ -140,13 +117,13 @@ def handle_plain_text_input(body, ack, say, message):
     stateValues = body['state']['values']
     # Access the value using the block_id and action_id
     submittedString = stateValues['my_input_block_id']['plain_text_input-action']['value']
-    #print("Submitted string:", submittedString)
 
-    numberOfPlayers = stateValues['player_number']['player_number_selection']['selected_option']['value']
-    #say("The Number of players is: " + numberOfPlayers)
+    # Access the selected number of players
+    numberOfPlayers = len(stateValues['multi_users_select']['users_select-action']['selected_users'])
     response = get_provider_response(
         user_id=body['user']['id'],
         prompt=submittedString.split(),
+        # To add in more variables, add the variable in the ai_constants file and then add the variable as an argument here.
         system_content=str.format(GAME_MASTER_SYSTEM_CONTENT, num_players=numberOfPlayers),
     )
     response = converter.convert(response)
