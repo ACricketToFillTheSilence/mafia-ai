@@ -1,3 +1,5 @@
+import json
+
 from .base_provider import BaseAPIProvider
 import anthropic
 import os
@@ -70,4 +72,51 @@ class AnthropicAPI(BaseAPIProvider):
             logger.error(
                 f"Another non-200-range status code was received: {e.status_code}"
             )
+            raise e
+        
+    def generate_json_response(self, prompt: str, system_content: str) -> str:
+        try:
+            self.client = anthropic.Anthropic(api_key=self.api_key)
+            response = self.client.messages.create(
+                model=self.current_model,
+                max_tokens=self.MODELS[self.current_model]["max_tokens"],
+                system=system_content,
+                messages=[
+                    {
+                        "role": "user", 
+                        "content": [{"type": "text", "text": prompt}]
+                    }
+                ],
+                output_config={
+                    "format":{
+                        "type": "json_schema",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "mafia_roles": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "name": {"type": "string"},
+                                            "generic_name": {"type": "string"},
+                                            "description": {"type": "string"},
+                                            "is_evil": {"type": "boolean"},
+                                            "number_of_players": {"type": "integer"},
+                                        },
+                                        "required": ["name", "generic_name", "description", "is_evil", "number_of_players"],
+                                        "additionalProperties": False,
+                                    },
+                                },
+                            },
+                            "required": ["mafia_roles"],
+                            "additionalProperties": False,
+                        },
+
+                    }
+                },
+            )
+            return response.content[0].text
+        except Exception as e:
+            logger.error(f"Error generating JSON response: {e}")
             raise e

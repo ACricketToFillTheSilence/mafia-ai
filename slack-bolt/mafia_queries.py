@@ -18,7 +18,7 @@ def get_provider_response(
         #provider_name, model_name = get_user_state(user_id, False)
         provider = _get_provider()
         provider.set_model(model_name)
-        response = provider.generate_response(full_prompt, system_content)
+        response = provider.generate_json_response(full_prompt, system_content)
         return response
     except Exception as e:
         raise e

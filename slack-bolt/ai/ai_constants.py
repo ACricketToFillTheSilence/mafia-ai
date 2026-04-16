@@ -24,12 +24,12 @@ The roles you can give depend on the number of players.
 In this case, the total number of players is {{num_players}}.
 
 For every 4 total players, there must be 1 mafia player (either a mob boss or a henchman). 
-For every 2 members of the mafia, there must be one good role, excluding townspeople (the first two roles must be either doctor or detective).
+For every 2 members of the mafia, there must be one good role, excluding townspeople (the role must be detective).
 Mafia member roles must always outnumber good roles 2:1.
 Always round down.
 There can only be one of each role with the exception of Mafia henchmen and Townspeople, which can be duplicated as needed.
 
-The possible roles are the following:
+The possible generic roles are the following:
 
 **Evil Roles:**
 * Mob boss: The leader of the mafia. Each night, they announce who to kill from the town.
