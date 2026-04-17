@@ -7,7 +7,6 @@ from slack_bolt.adapter.socket_mode import SocketModeHandler
 from ai.ai_constants import GAME_MASTER_SYSTEM_CONTENT
 from ai.anthropic import AnthropicAPI
 from mafia_queries import get_provider_response
-import json
 
 # This sample slack application uses SocketMode
 # For the companion getting started setup guide,
@@ -15,13 +14,6 @@ import json
 
 # Initializes your app with your bot token
 app = App(token=os.environ.get("SLACK_BOT_TOKEN"))
-
-#Access JSON schema for mafia characters
-with open("ai/mafia_characters.json", "r") as f:
-    json_data = json.load(f)
-
-# Load mafia characteristics formatting JSON file for formatting Claude's response
-# when generating mafia roles and characteristics.
 
 converter = SlackMarkdownConverter()
 
@@ -42,9 +34,6 @@ Townspeople (4 total):
 • Workhorse (Townspeople) - A sturdy horse with no special abilities.
 • Workhorse (Townspeople) - A sturdy horse with no special abilities.
 """
-
-@app.message("JSON")
-
 
 @app.message("Mafia")
 def message_new_game(message, say):
