@@ -17,25 +17,23 @@ app = App(token=os.environ.get("SLACK_BOT_TOKEN"))
 
 converter = SlackMarkdownConverter()
 
+fake_response = """
+Horses Mafia
 
-# Listens to incoming messages that contain "hello"
-@app.message("hello")
-def message_hello(message, say):
-    # say() sends a message to the channel where the event was triggered
-    say(
-        blocks=[
-            {
-                "type": "section",
-                "text": {"type": "mrkdwn", "text": f"Hey there <@{message['user']}>!"},
-                "accessory": {
-                    "type": "button",
-                    "text": {"type": "plain_text", "text": "Click Me"},
-                    "action_id": "button_click",
-                },
-            }
-        ],
-        text=f"Hey there <@{message['user']}>!",
-    )
+Mafia Members (2 total):
+• Stallion Boss (Mob boss) - The alpha horse who commands the herd to eliminate threats from the pasture each night.
+• Rogue Mustang (Mafia henchman) - A wild horse who assists the Stallion Boss in driving out one member of the herd each night.
+
+Good Roles (2 total):
+• Farrier (Detective) - A skilled horseshoe craftsman who can investigate one horse each night to discover their true nature.
+• Veterinarian (Doctor) - A healer who can tend to one horse each night, saving them from the herd's wrath.
+
+Townspeople (4 total):
+• Foal (Townspeople) - A young horse with no special abilities.
+• Foal (Townspeople) - A young horse with no special abilities.
+• Workhorse (Townspeople) - A sturdy horse with no special abilities.
+• Workhorse (Townspeople) - A sturdy horse with no special abilities.
+"""
 
 @app.message("Mafia")
 def message_new_game(message, say):
@@ -95,12 +93,12 @@ def message_new_game(message, say):
         text=f"Starting a new game of Mafia!",
     )
 
-
-@app.action("button_click")
-def action_button_click(body, ack, say):
-    # Acknowledge the action
-    ack()
-    say(f"<@{body['user']['id']}> clicked the button")
+@app.message("Test")
+def message_test(message, say):
+    say("This is a test message.")
+    parsed_roles =parse_roles_from_response(fake_response)
+    for item in parsed_roles:
+        say(item)
 
 @app.action("users_select-action")
 def handle_users_select(body, ack, say):
@@ -126,12 +124,45 @@ def handle_plain_text_input(body, ack, say, message):
         # To add in more variables, add the variable in the ai_constants file and then add the variable as an argument here.
         system_content=str.format(GAME_MASTER_SYSTEM_CONTENT, num_players=numberOfPlayers),
     )
-    response = converter.convert(response)
+    #response2 = converter.convert(response)
     say(response)
-    #say(f"<@{body['user']['id']}> submitted the theme: {submittedString}")
 
 
+
+    # Parse out roles from the response and say them in the channel
+    #for item in parse_roles_from_response(response):
+    #    say(item)
+
+    # Randomly assign roles to users
+
+
+def parse_roles_from_response(response):
+    role_list = []
+    # This function should parse the response from the AI and extract the roles and their descriptions.
+    for line in response.splitlines():
+        print("Here is the current line: " + line)
+        line = line.strip()
+        if line.startswith("•"):
+            print("The line starts with a bullet point, so it is a role.")
+            role_info = line[1:].strip()  # Remove the leading '-' and any extra whitespace
+            print(role_info)
+            role_name = role_info.split(":")[0]  # Split into name and description
+            print(role_name)
+            role_list.append(role_name.strip())
+
+    return role_list
+
+def assign_roles(users, roles):
+    import random
+
+    random.shuffle(roles)
+    assigned_roles = {}
+    for user, role in zip(users, roles):
+        assigned_roles[user] = role
+    return assigned_roles
 
 # Start your app
 if __name__ == "__main__":
     SocketModeHandler(app, os.environ["SLACK_APP_TOKEN"]).start()
+
+
